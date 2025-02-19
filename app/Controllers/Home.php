@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Models\Dmodel;
 use App\Models\Cmodel;
-use App\Models\AssignHardwaremodel;
+use App\Models\Omodel;
 
 class Home extends BaseController
 {
@@ -17,6 +17,11 @@ class Home extends BaseController
     public function signup()
     {
         return view('sign-up');
+    }
+
+    public function signup2()
+    {
+        return view('sign-up2');
     }
 
     public function checkuser()
@@ -38,7 +43,7 @@ class Home extends BaseController
 
         $modeldata = new Dmodel();
         
-        $data = $modeldata->where('email',$username)->first();
+        $data = $modeldata->where('email',$username,)->first();
 
         $session = session();
 
@@ -58,7 +63,7 @@ class Home extends BaseController
             if($data['email'] == $username && $data['pwd'] == $pwd)
             {
                     $role = $data['user_level'];
-                    if ($role== $rol) 
+                    if ($role == $rol) 
                     {
         
                         $session->set('uid',$uid);
@@ -77,7 +82,8 @@ class Home extends BaseController
                                 return $this->response->setJSON($response);
 
                             }
-                            else{
+                            else
+                            {
                                 $response = ['success'=> false, 'msg'=>'Your account status is inactive'];
                                 return $this->response->setJSON($response);
                             }
@@ -126,19 +132,70 @@ class Home extends BaseController
         
     }
     
-    public function addemp()
+    public function addofficer()
     {
         $session=session();
         $uid=$session->get('uid');
-        $userdata = new Dmodel();
+        $userdata = new Omodel();
         $data['userdata']=$userdata->where('uid',$uid)->first();
         $data['title']="Add Officer";
-        $data['main_content']='addemp';
+        $data['main_content']='addofficer';
         return view('common/template',$data);
     }
     
-    public function store_employee()
+    public function store_officer()
     {
+        $session = session();
+        $uid = $session->get('uid');
+        $userdata = new Omodel();
+
+        $data['userdata'] = $userdata->where('uid',$uid)->first();
+
+        $inputs = $this->validate([
+            'fullname'=> 'required',
+            'email'=> 'required',        
+            'joiningdate'=> 'required',
+            'branch'=> 'required',
+            'position'=> 'required',
+
+        ]);
+        if (!$inputs) 
+        {
+                
+                $response = ['success'=> false, 'msg'=>'Fill details properly'];
+                return $this->response->setJSON($response);
+        }
+
+        $data = [
+            
+            'fullname'=>  $this->request->getPost('fullname'),
+            'email'=> $this->request->getPost('email'),
+            'branch'=> $this->request->getPost('branch'),
+            'position'=> $this->request->getPost('position'),
+            'joining_date'=> $this->request->getPost('joiningdate'),
+
+        ];
+
+        $udata = new Omodel();
+
+        $obj = $udata->insert($data);
+
+        if($obj != false)
+        {
+            $response = ['success'=> true, 'msg'=>'Employee Added Successfully'];
+            return $this->response->setJSON($response);
+        }
+        else{
+            $response = ['success'=> false, 'msg'=>'Something went wrong.'];
+            return $this->response->setJSON($response);
+        }
+
+
+    }
+
+    public function store_employee2()
+    {
+        $data['main_content']='sign-up2';
         $session = session();
         $uid = $session->get('uid');
         $userdata = new Dmodel();
@@ -163,7 +220,6 @@ class Home extends BaseController
 
         $data = [
             
-            'code'=> $this->request->getPost('fullname'),
             'fullname'=>  $this->request->getPost('fullname'),
             'email'=> $this->request->getPost('email'),
             'pwd'=> md5($this->request->getPost('password')),
@@ -181,7 +237,7 @@ class Home extends BaseController
 
         if($obj != false)
         {
-            $response = ['success'=> true, 'msg'=>'Employee Added Successfully'];
+            $response = ['success'=> true, 'msg'=>'User Added Successfully'];
             return $this->response->setJSON($response);
         }
         else{
@@ -196,12 +252,12 @@ class Home extends BaseController
     {
         $session=session();
         $uid=$session->get('uid');
-        $userdata = new Dmodel();
+        $userdata = new Omodel();
 
         $data['userdata']=$userdata->where('uid',$uid)->first();
         $data['title']="View Officer";
         $data['main_content']="viewofficer";
-        $userdata=new Dmodel();
+        $userdata=new Omodel();
         $data['user']=$userdata->findAll();
         return view('common/template',$data);
     }
@@ -210,12 +266,12 @@ class Home extends BaseController
     {
         $session=session();
         $uid=$session->get('uid');
-        $userdata = new Dmodel();
+        $userdata = new Omodel();
 
         $data['userdata']=$userdata->where('uid',$uid)->first();
         $data['title']="Get Employee";
         $data['main_content']="getemp";
-        $userdata=new Dmodel();
+        $userdata=new Omodel();
         $data['user']=$userdata->findAll();
         return view('common/template',$data);
     }
@@ -234,18 +290,18 @@ class Home extends BaseController
 
         $session=session();
         $uid=$session->get('uid');
-        $userdata = new Dmodel();
+        $userdata = new Omodel();
         $data['userdata']=$userdata->where('uid',$uid)->first();
         $data['title']="Get Employee";
         $data['main_content']="getemp";
-        $userdata=new Dmodel();
+        $userdata=new Omodel();
         $data['user']=$userdata->findAll();
         return view('common/template',$data);
     }
 
     public function getallempdata()
     {
-        $model=new Dmodel();
+        $model=new Omodel();
         $data['userdata']=$model->orderBy('uid','DESC')->findAll();
         //print_r($data);
         return $this->response->setJSON($data);
@@ -365,13 +421,13 @@ class Home extends BaseController
 
         $data['empdata']=$userdata->findAll();
 
-        $assdata = new AssignHardwaremodel();
+        $assdata = new Omodel();
         $data['assdata'] = $assdata->findAll();
 
         $data['sql'] = $assdata->select('*')
-                        ->join('user_master', 'user_master.uid = assign_hardware.uid','inner')
-                        ->join('complaint_detail', 'complaint_detail.complaint_id = assign_hardware.hardware_id','inner')
-                        ->where('assign_hardware.uid',$uid)
+                        ->join('user_master', 'user_master.uid = officer_detail','inner')
+                        ->join('complaint_detail', 'complaint_detail.complaint_id = officer_detail.uid','inner')
+                        ->where('officer_detail',$uid)
                         ->findAll();
         
         return view('Employee/Emptemplate',$data);
@@ -383,27 +439,6 @@ class Home extends BaseController
         $data['title']="Dashboard";
         $data['main_content']="empdash";
         $session = session();
-
-        $uid = $session->get('uid');
-
-        $userdata = new Dmodel();
-
-        $data['userdata'] = $userdata->where('uid',$uid)->first();
-        
-        $hardwaredata = new Cmodel();
-        $data['hwddata']=$hardwaredata->findAll();
-
-        $data['empdata']=$userdata->findAll();
-
-        $assdata = new AssignHardwaremodel();
-        $data['assdata'] = $assdata->findAll();
-
-        $data['sql'] = $assdata->select('*')
-                        ->join('user_master', 'user_master.uid = assign_hardware.uid','inner')
-                        ->join('complaint_detail', 'complaint_detail.complaint_id = assign_hardware.hardware_id','inner')
-                        ->where('assign_hardware.uid',$uid)
-                        ->findAll();
-        
         return view('Employee/Emptemplate',$data);
 
     }
@@ -692,7 +727,7 @@ class Home extends BaseController
             $response=['success'=>false, 'msg'=>'Please select the Employee and Hardware'];
             return $this->response->setJESON($response);
         }
-        $insertdata=new AssignHardwaremodel();
+        $insertdata=new Omodel();
         $hwddata=new Cmodel();
 
         foreach($data as $row)
@@ -737,11 +772,11 @@ class Home extends BaseController
         $hardwaredata=new Cmodel();
         $data['hwddata']=$hardwaredata->findAll();
         $data['empdata']=$userdata->findAll();
-        $assdata=new AssignHardwaremodel();
+        $assdata=new Omodel();
         $data['assdata']=$assdata->findAll();
         $data['sql'] = $assdata->select('*')
-                        ->join('user_master','user_master.uid = assign_hardware.uid','inner')
-                        ->join('complaint_detail','complaint_detail.complaint_id = assign_hardware.complaint_id','inner')
+                        ->join('user_master','user_master.uid = officer_detail','inner')
+                        ->join('complaint_detail','complaint_detail.complaint_id = officer_detail.complaint_id','inner')
                         ->findAll();
         return view('common/template',$data);
 
@@ -874,19 +909,12 @@ class Home extends BaseController
     {
         $session=session();
         $uid=$session->get('uid');
-        $userdata=new Dmodel();
-        $data['userdata'] =$userdata->where('uid',$uid)->first();
+        $userdata=new Omodel();
+        $data['userdata']=$userdata->where('uid',$uid)->first();
         $data['title']="Generate Report";
         $data['main_content']="officer_report";
-        $hardwaredata=new Cmodel();
-        $data['hwddata']=$hardwaredata->findAll();
-        $data['empdata']=$userdata->findAll();
-        $assdata=new AssignHardwaremodel();
-        $data['assdata']=$assdata->findAll();
-        $data['sql'] = $assdata->select('*')
-                        ->join('user_master','user_master.uid = assign_hardware.uid','inner')
-                        ->join('complaint_detail','complaint_detail.complaint_id = assign_hardware.hardware_id','inner')
-                        ->findAll();
+        $hardwaredata=new Omodel();
+        $data['sql']=$hardwaredata->findAll();
         return view('common/template',$data);
     }
 
@@ -951,32 +979,6 @@ class Home extends BaseController
         $session->destroy();
         return view('sign-up');
 
-    }
-    public function getdata()
-    {
-        $model = new Dmodel();
-        $data = $model->findAll();
-        print_r ($data);
-        exit;
-        return $this->respond($data);
-    }
-
-    public function show($uid='22')
-    {
-        $model=new Dmodel();
-        $data=$model->getWhere(['uid'=>$uid])->getResult();
-        if($data)
-        {
-            print_r($data);
-            exit;
-            return $this->respond($data);
-        }
-        else
-        {
-            echo ('No Data Found with uid'.$uid);
-            exit;
-            return $this->failNotFound('No Data Found with id'.$uid);
-        }
     }
 }
 ?>

@@ -95,7 +95,7 @@
 								</div>
 
 								<div class="menu-item">
-									<a class="menu-link" href="<?php echo base_url('complaint_report'); ?>">
+									<a class="menu-link" href="<?php echo base_url('view_Assign_Hwd'); ?>">
 										<span class="menu-bullet">
 											<span class="bullet bullet-dot"></span>
 										</span>

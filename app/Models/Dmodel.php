@@ -7,11 +7,9 @@ class Dmodel extends Model
 {
     protected $table = 'user_master';
     protected $primaryKey = 'uid';
-    protected $allowedFields = [    'code',
-                                    'fullname',
+    protected $allowedFields = [    'fullname',
                                     'email',
                                     'pwd',
-                                    'Phone',
                                     'user_level',
                                     'branch',
                                     'position',

@@ -31,7 +31,6 @@
 
             <td class="text-gray-600 fw-bold fs-6"> <?php echo $row['fullname'];?></td>
             <td class="text-gray-600 fw-bold fs-6"><?php echo $row['email'];?></td>
-            <!--<td class="text-gray-600 fw-bold fs-6"></td>-->
             <td class="text-gray-600 fw-bold fs-6"><?php echo $row['branch'];?></td>
              
             <td class="text-gray-600 fw-bold fs-6"><?php echo $row['position'];?></td>

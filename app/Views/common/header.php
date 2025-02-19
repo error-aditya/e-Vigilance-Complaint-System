@@ -62,7 +62,7 @@
 										</div>
 									</div>
 									<div class="menu-item">
-										<a class="menu-link" href="<?php echo base_url('addemp'); ?>">
+										<a class="menu-link" href="<?php echo base_url('addofficer'); ?>">
 											<span class="menu-bullet">
 												<span class="bullet bullet-dot"></span>
 											</span>
